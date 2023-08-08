@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <title>Seshat Dashboard</title>
+    <head>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
+    </head>
+<body">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgba(0, 130, 243, 0.733)">
+      <a class="navbar-brand" href="#" style="margin-left: 10px;">
+        SESHAT
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./workers.html">Workers</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Logs</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div style="margin: 10px;">
+      <table id="log_table_id" class="display">
+        <thead>
+          <tr>
+              <th>Worker ID</th>
+              <th>Task Type</th>
+              <th># of requests</th>
+              <th># of pass</th>
+              <th># of fail</th>
+              <th># of time out</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Worker ID</th>
+            <th>Task Type</th>
+            <th># of requests</th>
+            <th># of pass</th>
+            <th># of fail</th>
+            <th># of time out</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <script>
+        var logData = {{ logDataInfo | safe }};
+        $(document).ready(function() {
+          $('#log_table_id tfoot th').each(function() {
+            var title = $(this).text();
+            $(this).html('<input type="text" placeholder="Search ' + title + '" />')
+          });
+
+          var table = $('#log_table_id').DataTable({
+            data: logData,
+            searchPanes: {
+              viewTotal: true
+            },
+            dom: 'Plfrtip'
+          });
+
+          table.columns().every( function() {
+            var that = this;
+
+            $('input', this.footer()).on('keyup change', function() {
+              if (that.search() !== this.value) {
+                  that
+                    .search(this.value)
+                    .draw();
+              }
+            });
+          });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <title>Seshat Dashboard</title>
+    <head>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
+    </head>
+<body">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgba(0, 130, 243, 0.733)">
+      <a class="navbar-brand" href="#" style="margin-left: 10px;">
+        SESHAT
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./workers.html">Workers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./logs.html">Logs</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col" style="margin: 5px; margin-right: 2.5px;">
+          <div class="row" style="height: 40vh;">
+            <div class="col" style="background-color:rgb(233, 243, 251); padding-top: 5px; padding-bottom: 15px;">
+              <canvas id="taskPieGraph"></canvas>
+            </div>
+            <div class="col" style="margin-left: 5px; background-color:rgb(233, 243, 251); padding-top: 5px; padding-bottom: 15px;">
+              <canvas id="polarAreaChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col" style="margin: 5px; margin-left: 2.5px;">
+          <div class="row" style="height: 40vh;">
+            <div class="col" style="background-color:rgb(233, 243, 251); padding-top: 5px; padding-bottom: 15px;">
+              <canvas id="passPercentageGraph"></canvas>
+            </div>
+            <div class="col" style="margin-left: 5px; background-color:rgb(233, 243, 251); padding-top: 5px; padding-bottom: 15px;">
+              <canvas id="passFailedBarChartGraph"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin: 10px;">
+        <table id="table_id" class="display">
+          <thead>
+            <tr>
+                <th>Task</th>
+                <th>99% (ms)</th>
+                <th>99.9% (ms)</th>
+                <th>99.99% (ms)</th>
+                <th>99.999% (ms)</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+
+      <script>
+        const taskPieGraphCtx = document.getElementById('taskPieGraph');
+        const passPercentageGraphCtx = document.getElementById('passPercentageGraph');
+        const polarAreaChartCtx = document.getElementById('polarAreaChart');
+        const passFailedBarCtx = document.getElementById('passFailedBarChartGraph');
+  
+        let taskPieGraph = new Chart(taskPieGraphCtx, {
+          type: 'pie',
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: "Tasks Distributed Percentage"
+              }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+          },
+          data: {
+            labels: {{ task_distributed_labels | safe }},
+            datasets: [{
+              data: {{ task_distributed_percentage | safe }},
+              hoverOffset: 4
+            }]
+          }
+        });
+  
+        let passPercentageGraph = new Chart(passPercentageGraphCtx, {
+          type: 'doughnut',
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: "Tasks Passed Percentage"
+              }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+          },
+          data: {
+            labels: {{ tasks_passed_labels | safe }},
+            datasets: [{
+              data: {{ task_passed_data | safe }},
+              hoverOffset: 4
+            }]
+          }
+        });
+
+        let polarAreaChartGraph = new Chart(polarAreaChartCtx, {
+          type: 'polarArea',
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: "Average Duration Per Task"
+              }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+          },
+          data: {
+            labels: {{ polar_area_labels | safe }},
+            datasets: [{
+              data: {{ polar_area_average_data | safe }}
+            }]
+          }
+        });
+
+        let passFailedBarGraph = new Chart(passFailedBarCtx, {
+          type: 'bar',
+          data: {
+            labels: {{ passFailLabels | safe }},
+            datasets: {{ passFailBarData | safe }}
+          },
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: "Passed Percentage Per Task"
+              }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                stacked: true
+              },
+              y: {
+                stacked: true
+              }
+            }
+          }
+        });
+
+        var tableData = {{ percentile_data_table | safe }};
+
+        $('#table_id').DataTable({
+          data: tableData
+        });
+      </script>
+</body>
+</html>

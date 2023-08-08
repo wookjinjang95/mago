@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <title>Seshat Dashboard</title>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </head>
+<body">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.js"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgba(0, 130, 243, 0.733)">
+      <a class="navbar-brand" href="#" style="margin-left: 10px;">
+        SESHAT
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Home</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Workers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./logs.html">Logs</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="row" style="margin-top: 10px; margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
+      <canvas id="myChart3" style="background-color: rgb(233, 243, 251); height: 40vh; width: 100%;"></canvas>
+    </div>
+    <div class="row" style="margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
+      <canvas id="myChart2" style="background-color:rgb(233, 243, 251); height: 40vh; width: 100%;"></canvas>
+    </div>
+    <div class="row" style="margin-left: 10px; margin-right: 10px; margin-bottom: 10px;">
+      <canvas id="myChart" style="background-color:rgb(233, 243, 251); height: 40vh; width: 100%;"></canvas>
+    </div>
+      
+    <script>
+    const ctx = document.getElementById('myChart');
+    const ctx2 = document.getElementById('myChart2');
+    const ctx3 = document.getElementById('myChart3');
+
+    let chart1 = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ num_of_tasks_x_labels | safe }},
+        datasets: {{ num_of_tasks_datasets | safe }}
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Number of Tasks"
+          }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+            }
+        },
+        responsive: true
+      }
+    });
+
+    let chart2 = new Chart(ctx2, {
+        type: 'line',
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Number of Workers"
+            }
+          },
+          scales: {
+              y: {
+                  min: 0
+              },
+              xAxis: {
+                type: 'time',
+              }
+          },
+          responsive: true
+        },
+        data: {
+            datasets: {{ num_of_workers_datasets | safe }}
+        }
+    });
+
+    let chart3 = new Chart(ctx3, {
+        type: 'line',
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Average Response Time"
+            }
+          },
+          scales: {
+              xAxis: {
+                type: 'time',
+              },
+              y: {
+                  min: 0
+              }
+          },
+          responsive: true
+        },
+        data: {
+            datasets: {{ avg_response_datasets | safe }}
+        }
+    });
+    </script>
+</body>
+</html>
