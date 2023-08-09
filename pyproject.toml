@@ -8,8 +8,8 @@ license = { text = "MIT" }
 description = "Open Source general testing framework"
 requires-python = ">=3.7"
 dependencies = [
-    numpy,
-    django
+    "numpy",
+    "django"
 ]
 
 [tool.setuptools_scm]
