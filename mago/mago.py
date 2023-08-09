@@ -2,7 +2,8 @@ from .utils.report_generator import ReportGenerator
 from .utils.traffic_manager import TrafficManager
 from .utils.collector import Collector
 from typing import Callable, Tuple
-import logging
+import logging, os
+
 
 logging.basicConfig(level=logging.DEBUG)
 """
@@ -21,6 +22,9 @@ class Mago:
         output_path: str
     ):
         self.output_path = output_path
+        if not os.path.exists(self.output_path):
+            os.mkdir(self.output_path)
+
         self.traffic_manager = TrafficManager(
             tasks=tasks,
             tasks_args=tasks_args,

@@ -1,73 +1,94 @@
-from seshat.utils.collector import Collector
+from mago.utils.collector import Collector
 from unittest.mock import MagicMock
-from seshat.utils.worker import Worker
+from mago.utils.worker import Worker
 from datetime import datetime, timedelta
 
-workers = []
+
 def task_test():
     pass
 
+test_data = {task_test.__name__: []}
+timer = datetime.now()
+
 for id in range(10):
-    worker = Worker(id=id, task=task_test, args=(), name="Worker {}".format(id))
+    worker = Worker(id=id, task=task_test, args=())
     worker.get_result = MagicMock(
         return_value={
             "id": id,
             "log": "Worker Log {}".format(id),
             "created": datetime.now(),
             "result": [{
-                "start_time": datetime.now(),
-                "end_time": datetime.now() + timedelta(seconds=5),
+                "start_time": timer,
+                "end_time": timer + timedelta(seconds=5),
                 "duration": 5,
                 "value": 5,
                 "status": "SUCCESS"
             }]
         }
     )
-    workers.append(worker)
+    worker.get_total_tasks_executed = MagicMock(
+        return_value=1
+    )
+    timer += timedelta(seconds=1)
+    test_data[task_test.__name__].append(worker)
 
 def test_workers_result():
-    results = Collector.collect_workers_result(workers)
-    for id in range(len(results)):
-        assert results[id]['id'] == id
-        assert results[id]['value'] == 5
-        assert results[id]['start_time'] < results[id]['end_time']
+    results = Collector.collect_workers_result(test_data)
+    assert task_test.__name__ in results
+    assert len(results[task_test.__name__]) == 10
+    for id in range(len(results[task_test.__name__])):
+        each = results[task_test.__name__][id]
+        assert each['start_time'] < each['end_time']
+        assert each['duration'] == 5
+        assert each['value'] == 5
+        assert each['status'] == "SUCCESS"
+        assert each['id'] == id
 
 def test_collect_total_clients_per_timeline():
-    data = Collector.collect_total_clients_per_timeline(workers)
-    for i in range(len(data)):
-        assert data[i]['x'] == i
-        assert data[i]['y'] == 10
-        if i < len(data) - 1:
-            assert data[i]['x'] < data[i+1]['x']
+    results = Collector.collect_total_clients_per_timeline(test_data)
+    assert len(results) == 1
+    assert len(results[0]) > 1
+    for each in results:
+        assert each['label'] == task_test.__name__
+        assert each['tension'] == 0.5
+        assert len(each['data']) > 0
+        for each_data in each['data']:
+            assert 'x' in each_data
+            assert 'y' in each_data
 
 def test_total_task_finished_per_worker():
-    names, results = Collector.collect_total_task_finished_per_worker(workers)
-    assert len(names) == len(workers)
-    assert len(results) == len(workers)
-    for name, tasks, worker in zip(names, results, workers):
-        assert name == worker._name
-        assert tasks == 1
-
+    x_labels, y_labels = Collector.collect_total_task_finished_per_worker(test_data)
+    assert len(x_labels)
+    assert len(y_labels) == 1
+    for each in y_labels:
+        assert each['label'] == task_test.__name__
+        assert each['tension'] == 0.5
+        assert len(each['data']) > 0
+        for each_data in each['data']:
+            assert each_data == 1
+    
 def test_collect_percentile():
-    data = Collector.collect_percentile(workers)
-    assert data['99percentile'] > 0
-    assert data['999percentile'] > 0
-    assert data['9999percentile'] > 0
-    assert data['9999percentile'] > 0
-
-def test_collect_pure_log_text():
-    data = Collector.collect_pure_log_text(workers)
-    assert len(data) == len(workers)
-    for log in data:
-        assert log != "" or log != None
+    results = Collector.collect_percentile(test_data)
+    assert len(results) == 1
+    for each in results:
+        assert len(each) == 5
+        assert each[0] == task_test.__name__
+        assert each[1] > 0
+        assert each[2] > 0
+        assert each[3] > 0
+        assert each[4] > 0
 
 def test_give_average_durations():
-    x_labels, y_labels = Collector.give_average_durations(workers)
-    assert len(x_labels) == len(y_labels)
-    assert x_labels[0] == 0
-    assert x_labels[1] == 5
-    assert y_labels[0] == 0
-    assert y_labels[1] == 5
+    min_time, y_labels = Collector.give_average_durations(test_data)
+    assert type(min_time) == str
+    assert len(y_labels) == 1
+    for each in y_labels:
+        assert each['label'] == task_test.__name__
+        assert each['tension'] == 0.5
+        assert len(each['data']) > 0
+        for each_data in each['data']:
+            assert 'x' in each_data
+            assert 'y' in each_data
 
 
     

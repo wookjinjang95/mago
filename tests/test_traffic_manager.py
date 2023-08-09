@@ -1,4 +1,4 @@
-from seshat.utils.traffic_manager import TrafficManager
+from mago.utils.traffic_manager import TrafficManager
 import random, time
 
 
@@ -112,7 +112,8 @@ def test_two_tasks():
     tm = TrafficManager(
         tasks=[sleep_two_seconds, sleep_three_seconds],
         tasks_args=[(), ()],
-        oper_types=['peak_load', 'peak_load']
+        oper_types=['peak_load', 'peak_load'],
+        timeout=15
     )
 
     tm.run()
@@ -133,7 +134,8 @@ def test_two_tasks_with_different_methods():
     tm = TrafficManager(
         tasks=[sleep_two_seconds, sleep_three_seconds],
         tasks_args=[(), ()],
-        oper_types=['peak_load', 'incremental_traffic']
+        oper_types=['peak_load', 'incremental_traffic'],
+        timeout=15
     )
 
     tm.run()

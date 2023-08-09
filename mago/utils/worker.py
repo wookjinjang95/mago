@@ -1,13 +1,14 @@
 from datetime import datetime
 from threading import Thread
+from typing import Callable, Tuple
 import logging
 
 
 class Worker(Thread):
     def __init__(self,
         id: int,
-        task,
-        args,
+        task: Callable,
+        args: Tuple,
         repeat: bool = False,
         timeout: int = None
     ):
