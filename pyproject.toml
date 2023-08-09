@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seshat"
+license = { text = "MIT" }
+description = "Open Source general testing framework"
+requires-python = ">=3.7"
+dependencies = [
+    numpy,
+    django
+]
+
+[tool.setuptools_scm]
