@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 
     TODO: Create a test for Seshat itself
 """
-class Seshat:
+class Mago:
     def __init__(
         self,
         tasks: list[Callable],

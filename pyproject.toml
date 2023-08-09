@@ -3,7 +3,7 @@ requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "seshat"
+name = "mago"
 version = "0.0.1"
 authors = [
     { name="Wookjin Jang", email="wookjinjang95@gmail.com" },
