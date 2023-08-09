@@ -4,9 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "seshat"
-license = { text = "MIT" }
-dynamic = ["version"]
+version = "0.0.1"
+authors = [
+    { name="Wookjin Jang", email="wookjinjang95@gmail.com" },
+]
 description = "Open Source general testing framework"
+readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
     "numpy",
