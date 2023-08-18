@@ -101,3 +101,21 @@ mago = Mago(
 ```
 
 The above parameters will have random_sleep task to run in continuous_load traffic and sleep_2_seconds will run in peak_load traffic.
+
+## Output
+
+The output folder path will define where the report will get stored into. Mago will output multiple html files, the main is index.html, and rest are logs.html and workers.html.
+
+* (output folder directory)
+    * index.html
+    * workers.html
+    * logs.html
+
+### Index.html
+This report shows the general information, in high level, of task distribution, average duration for each task, and pass percentages.
+
+### Workers.html
+The worker report will show graph of average response time, number of workers that were active or alive in a timeline, and number of tasks given for each of the worker.
+
+### Logs.html
+The log report is a data tables that shows all the detailed information for each individual thread or worker. This can be used for detail debugging and analyzing flaky results.
