@@ -73,3 +73,36 @@ def test_worker_with_repeat_with_timeout():
     assert len(result['result']) >= 9
     assert len(result['result']) <= 11
 
+def test_worker_logging():
+    def sleep_one_second():
+        time.sleep(1)
+
+    workers = []
+    workers.append(
+        Worker(
+            id=1,
+            task=sleep_one_second,
+            args=(),
+            timeout=5,
+            repeat=True
+        )
+    )
+    workers.append(
+        Worker(
+            id=2,
+            task=sleep_one_second,
+            args=(),
+            timeout=5,
+            repeat=True
+        )
+    )
+
+    for worker in workers:
+        worker.start()
+
+    for worker in workers:
+        worker.join()
+
+    logs = [w.get_log() for w in workers]
+    for log in logs:
+        assert log != ""

@@ -1,12 +1,13 @@
 from datetime import datetime
 from threading import Thread
 from typing import Callable, Tuple
+from io import StringIO
 import logging
 
 
 class Worker(Thread):
     def __init__(self,
-        id: int,
+        id: str,
         task: Callable,
         args: Tuple,
         repeat: bool = False,
@@ -28,24 +29,24 @@ class Worker(Thread):
         self._tasks_executed = 0
         self._total_passed = 0
         self._total_timedout = 0
-
-    """
-        TODO: Figure a way to collect system logs
-    """
-    def _logger(self, message) -> None:
-        self._log += "{}\n".format(message)
+        self.log_stream = StringIO()
+        self.log_handler = logging.StreamHandler(self.log_stream)
+        self.logger = logging.getLogger("WorkerLogger:{}".format(self._id))
+        self.logger.setLevel(logging.ERROR)
+        self.logger.addHandler(self.log_handler)
 
     """
         This is the main run function that will execute the task given.
         In order to run this, please run Worker.start(). That will
         kick off this function as this function is override of Thread.
+        Just note that Thread can be run only once.
     """
     def run(self) -> None:
-        self._logger("Starting worker: {} with task: {}".format(
-            self._id, self._task.__name__))
         self._time_created = datetime.now()
 
         while not self._stop_loop:
+            self.logger.info("Starting worker: {} with task: {}".format(
+                self._id, self._task.__name__))
             time_started = datetime.now()
             status = "SUCCESS"
             result = None
@@ -55,12 +56,12 @@ class Worker(Thread):
                     result = "EMPTY RESPONSE"
                 self._total_passed += 1
             except Exception as err:
-                self._logger("Failed to execute due to error : {}".format(err))
+                self.logger.error("Failed to execute due to error : {}".format(err))
                 status = "FAILED"
                 self._total_timedout += 1
             finally:
                 time_ended = datetime.now()
-                self._logger("Worker {} has succesfully finished the process.".format(
+                self.logger.info("Worker {} has succesfully finished the process.".format(
                     self._id))
 
                 if self._timeout != None:
@@ -79,6 +80,7 @@ class Worker(Thread):
 
             if not self._repeat:
                 break
+        
 
     """
         Returning the raw value of the result.
@@ -111,3 +113,19 @@ class Worker(Thread):
 
     def get_total_timedout(self) -> int:
         return self._total_timedout
+
+    def get_total_min_duration(self) -> float:
+        return min([each_result['duration'] for each_result in self._results])
+
+    def get_total_max_duration(self) -> float:
+        return max([each_result['duration'] for each_result in self._results])
+
+    def get_avg_duration(self) -> float:
+        totalSum = sum([each_result['duration'] for each_result in self._results])
+        return totalSum / self._tasks_executed
+
+    def get_log(self) -> str:
+        logs = self.log_stream.getvalue()
+        if not logs:
+            return "No Errors"
+        return logs

@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 from typing import Callable, Tuple
 from threading import Thread
 from collections import defaultdict
-import time
+import time, itertools
 
 
 """
     TODO: Add logging for this class.
     TODO: Max workers are not defined.
-    TODO: The worker overlaps in ID for the different task.
 
     Convert task argument into list and we want args for that list also.
     Use args as list also. It will be one to one ratio reference.
@@ -31,6 +30,7 @@ class TrafficManager:
         self.workers_per_iter = kwargs.get("workers_per_iter", 1)
         self.processes = []
         self.results = defaultdict(list)
+        self.traffic_unique_id = itertools.count()
 
     """
         Remember that when you run the traffic manager again, it will
@@ -43,9 +43,15 @@ class TrafficManager:
         self.processes = []
         self.results = defaultdict(list)
 
-    def _start_process(self) -> None:
-        for process in self.processes:
-            process.start()
+    def _generate_traffic_unique_id(self):
+        return str(next(self.traffic_unique_id))
+
+    def _generate_thread_id(self, traffic_name, traffic_id, thread_id):
+        return "{}-{}-{}".format(traffic_name, traffic_id, thread_id)
+
+    def _start_process(self, childs) -> None:
+        for child in childs:
+            child.start()
 
     #This wait function is general wait function.
     def _wait(self, childs) -> None:
@@ -65,12 +71,20 @@ class TrafficManager:
     def run(self) -> list[Worker]:
         self._before_run()
         for task, task_args, oper_type in zip(self.tasks, self.tasks_args, self.oper_types):
+            traffic_id = self._generate_traffic_unique_id()
+            print("Generated ID: {} for traffic typ: {}".format(traffic_id, oper_type))
             if oper_type == "incremental_traffic":
-                p = Thread(target=self.incremental_traffic, args=(task, task_args))
+                p = Thread(
+                    target=self.incremental_traffic,
+                    args=(oper_type, traffic_id, task, task_args))
             elif oper_type == "peak_load":
-                p = Thread(target=self.peak_load, args=(task, task_args))
+                p = Thread(
+                    target=self.peak_load,
+                    args=(oper_type, traffic_id, task, task_args))
             elif oper_type == "continuous_load":
-                p = Thread(target=self.continuous_load, args=(task, task_args))
+                p = Thread(
+                    target=self.continuous_load,
+                    args=(oper_type, traffic_id, task, task_args))
             else:
                 raise Exception(
                     "The operation : {} couldn't be found under TrafficManager".format(
@@ -79,7 +93,7 @@ class TrafficManager:
             self.processes.append(p)
 
         print("Starting the process")
-        self._start_process()
+        self._start_process(self.processes)
 
         print("Waiting for all processes to finish by traffic manager..")
         self._wait(self.processes)
@@ -94,7 +108,7 @@ class TrafficManager:
         test will be 1 Client, second iteration test will be 2 clients, 
         and so forth until N clients for Nth iteration.
     """
-    def incremental_traffic(self, task, task_args) -> None:
+    def incremental_traffic(self, traffic_name, traffic_id, task, task_args) -> None:
         result = []
         id_tracker = 0
 
@@ -104,8 +118,9 @@ class TrafficManager:
             for _ in range(0, i+1):
                 workers.append(
                     Worker(
-                        id=id_tracker,
-                        args=task_args,
+                        id=self._generate_thread_id(
+                            traffic_name, traffic_id, id_tracker),
+                        args=i,
                         task=task
                     )
                 )
@@ -124,14 +139,16 @@ class TrafficManager:
         Each of the worker will do the task again and again until the
         timout of the test duration.
     """
-    def peak_load(self, task, task_args) -> None:
+    def peak_load(self, traffic_name, traffic_id, task, task_args) -> None:
         workers = []
         id_tracker = 0
 
         for _ in range(self.total_workers):
             workers.append(
                 Worker(
-                    id=id_tracker,
+                    id=self._generate_thread_id(
+                        traffic_name, traffic_id, id_tracker
+                    ),
                     task=task,
                     timeout=self.timeout,
                     repeat=True,
@@ -155,6 +172,8 @@ class TrafficManager:
     """
     def continuous_load(
         self,
+        traffic_name: str,
+        traffic_id,
         task,
         task_args
     ) -> None:
@@ -167,12 +186,13 @@ class TrafficManager:
             for _ in range(self.workers_per_iter):
                 this_iter_workers.append(
                     Worker(
-                        id=id_tracker,
+                        id=self._generate_thread_id(
+                            traffic_name, traffic_id, id_tracker
+                        ),
                         task=task,
                         args=task_args
                     )
                 )
-                id_tracker += 1
 
             for worker in this_iter_workers:
                 worker.start()
@@ -183,6 +203,6 @@ class TrafficManager:
 
         self.results[task.__name__] += workers
 
-        
+
 
     

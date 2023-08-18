@@ -4,9 +4,6 @@ from collections import defaultdict
 import numpy as np
 
 
-"""
-    TODO: Create the test for Collector
-"""
 class Collector:
     @staticmethod
     def generate_datasets(y_labels: dict[str, list]):
@@ -65,19 +62,37 @@ class Collector:
 
         return Collector.generate_datasets(y_labels)
 
-    #Counting total task will be depreciated in the worker side to reduce the O(N)
-    #operation in the future.
     @staticmethod
     def collect_total_task_finished_per_worker(data: dict[str, list[Worker]]):
-        x_labels = set()
-        y_labels = defaultdict(list)
+        index = total_workers = 0
+        x_labels = []
+        y_labels = {}
+        indices = defaultdict(list)
+        #first get total_workers
+        for _, each_data in data.items():
+            total_workers += len(each_data)
+        
+        """
+        generate key, value which the key is thread_unique_ID
+        #and the value is the index of the list.
+        for example, two unique thread ID will have
+        {
+            "threadID#1": 0,
+            "threadID#2": 1
+        }
+        """
+        for _, each_data in data.items():
+            for worker in each_data:
+                indices[worker._id] = index
+                x_labels.append(worker._id)
+                index += 1
 
         for task, each_data in data.items():
+            y_labels[task] = [0 for _ in range(total_workers)]
             for worker in each_data:
-                x_labels.add(worker._id)
-                y_labels[task].append(worker.get_total_tasks_executed())
+                y_labels[task][indices[worker._id]] = worker.get_total_tasks_executed()
         
-        return list(x_labels), Collector.generate_datasets(y_labels)
+        return x_labels, Collector.generate_datasets(y_labels)
 
     @staticmethod
     def collect_percentile(data: dict[str, list[Worker]]):
@@ -97,10 +112,6 @@ class Collector:
                 np.percentile(np_array, 99.999)
             ])
         return percentile_data_table
-
-    @staticmethod
-    def collect_pure_log_text(workers: list[Worker]):
-        return [w.get_result()['log'] for w in workers]
 
     # TODO: This is pretty complicated, we need to break down into simpler terms.
     @staticmethod
@@ -240,12 +251,13 @@ class Collector:
                         worker.get_total_tasks_executed(),
                         worker.get_total_passed(),
                         worker.get_total_failed(),
+                        worker.get_total_min_duration(),
+                        worker.get_total_max_duration(),
+                        worker.get_avg_duration(),
                         worker.get_total_timedout()
                     ]
                 )
         return datasets
-
-
 
 
             
