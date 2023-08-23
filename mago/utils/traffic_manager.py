@@ -111,11 +111,13 @@ class TrafficManager:
     def incremental_traffic(self, traffic_name, traffic_id, task, task_args) -> None:
         result = []
         id_tracker = 0
+        current_workers = 1
+        end_duration_time = datetime.now() + timedelta(seconds=self.timeout)
 
-        for i in range(self.total_workers):
-            print("Setting total of {} workers".format(i+1))
+        while datetime.now() < end_duration_time:
             workers = []
-            for _ in range(0, i+1):
+            print("Setting total of {} workers".format(current_workers))
+            for _ in range(current_workers):
                 workers.append(
                     Worker(
                         id=self._generate_thread_id(
@@ -131,6 +133,9 @@ class TrafficManager:
             
             self._wait(workers)
             result += workers
+
+            if current_workers < self.total_workers:
+                current_workers += 1
         
         self.results[task.__name__] += result
 
