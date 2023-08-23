@@ -2,7 +2,7 @@ from datetime import datetime
 from threading import Thread
 from typing import Callable, Tuple
 from io import StringIO
-import logging
+import logging, time
 
 
 class Worker(Thread):
@@ -42,12 +42,12 @@ class Worker(Thread):
         Just note that Thread can be run only once.
     """
     def run(self) -> None:
-        self._time_created = datetime.now()
+        self._time_created = time.time()
 
         while not self._stop_loop:
             self.logger.info("Starting worker: {} with task: {}".format(
                 self._id, self._task.__name__))
-            time_started = datetime.now()
+            time_started = time.time()
             status = "SUCCESS"
             result = None
             try:
@@ -60,19 +60,19 @@ class Worker(Thread):
                 status = "FAILED"
                 self._total_timedout += 1
             finally:
-                time_ended = datetime.now()
+                time_ended = time.time()
                 self.logger.info("Worker {} has succesfully finished the process.".format(
                     self._id))
 
                 if self._timeout != None:
-                    if self._get_execution_time(self._time_created, time_ended) > self._timeout:
+                    if time_ended - self._time_created > self._timeout:
                         status = "FAILED DUE TO TIMEOUT"
                         self._stop_loop = True
                 
                 self._results.append({
-                    "start_time": time_started,
-                    "end_time": time_ended,
-                    "duration": self._get_execution_time(time_started, time_ended),
+                    "start_time": time_started * 1000,
+                    "end_time": time_ended * 1000,
+                    "duration": (time_ended - time_started) * 1000,
                     "value": result,
                     "status": status
                 })
@@ -81,13 +81,6 @@ class Worker(Thread):
             if not self._repeat:
                 break
         
-
-    """
-        Returning the raw value of the result.
-    """
-    def _get_execution_time(self, start_time, end_time) -> int:
-        return int((end_time - start_time).total_seconds())
-
     """
         Get all info
     """

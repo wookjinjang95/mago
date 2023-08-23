@@ -34,7 +34,7 @@
         </ul>
       </div>
     </nav>
-    <div style="margin: 10px;">
+    <div style="width: 100%; padding: 10px;">
       <table id="log_table_id" class="cell-border">
         <thead>
           <tr>
@@ -43,9 +43,9 @@
               <th># of requests</th>
               <th># of pass</th>
               <th># of fail</th>
-              <th>Min. Duration</th>
-              <th>Max. Duration</th>
-              <th>Avg. Duartion</th>
+              <th>Min. Duration (ms)</th>
+              <th>Max. Duration (ms)</th>
+              <th>Avg. Duartion (ms)</th>
               <th># of time out</th>
           </tr>
         </thead>
@@ -56,9 +56,9 @@
             <th># of requests</th>
             <th># of pass</th>
             <th># of fail</th>
-            <th>Min. Duration</th>
-            <th>Max. Duration</th>
-            <th>Avg. Duartion</th>
+            <th>Min. Duration (ms)</th>
+            <th>Max. Duration (ms)</th>
+            <th>Avg. Duartion (ms)</th>
             <th># of time out</th>
           </tr>
         </tfoot>
@@ -74,7 +74,7 @@
 
           var table = $('#log_table_id').DataTable({
             data: logData,
-            scrolLX: true,
+            scrollX: true,
             searchPanes: {
               viewTotal: true
             },

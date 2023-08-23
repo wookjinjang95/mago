@@ -120,7 +120,7 @@ class TrafficManager:
                     Worker(
                         id=self._generate_thread_id(
                             traffic_name, traffic_id, id_tracker),
-                        args=i,
+                        args=task_args,
                         task=task
                     )
                 )

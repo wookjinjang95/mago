@@ -1,5 +1,4 @@
 from .worker import Worker
-from datetime import datetime, timedelta
 from collections import defaultdict
 import numpy as np
 
@@ -40,10 +39,10 @@ class Collector:
         for task, each_data in new_data.items():
             count_start_and_end_time[task] = defaultdict(int)
             for exec_data in each_data:
-                start_time = exec_data['start_time'].strftime("%Y-%m-%d %H:%M:%S")
-                end_time = exec_data['end_time'].strftime("%Y-%m-%d %H:%M:%S")
-                count_start_and_end_time[task][start_time] += 1
-                count_start_and_end_time[task][end_time] -= 1
+                rounded_start_time = int(exec_data['start_time'] / 1000)
+                roudned_end_time = int(exec_data['end_time'] / 1000)
+                count_start_and_end_time[task][rounded_start_time] += 1
+                count_start_and_end_time[task][roudned_end_time] -= 1
 
         y_labels = {}
         for task in count_start_and_end_time:
@@ -135,13 +134,11 @@ class Collector:
         for task, times in formatted_data.items():
             collected_data[task] = {}
             for end_time, duration in times:
-                time = end_time.strftime("%Y-%m-%d %H:%M:%S")
-
-                if not time in collected_data[task]:
-                    collected_data[task][time] = [duration, 1]
+                if not end_time in collected_data[task]:
+                    collected_data[task][end_time] = [duration, 1]
                 else:
-                    collected_data[task][time][0] += duration
-                    collected_data[task][time][1] += 1
+                    collected_data[task][end_time][0] += duration
+                    collected_data[task][end_time][1] += 1
 
         y_labels = {}
         for task in collected_data:
@@ -153,7 +150,7 @@ class Collector:
                 })
             y_labels[task].sort(key=lambda d: d['x'])
         
-        return min_time.strftime("%Y-%m-%d %H:%M:%S"), Collector.generate_datasets(y_labels)
+        return str(min_time), Collector.generate_datasets(y_labels)
 
     @staticmethod
     def get_task_distributed(data: dict[str, list[Worker]]):
@@ -258,11 +255,3 @@ class Collector:
                     ]
                 )
         return datasets
-
-
-            
-                
-                
-
-
-

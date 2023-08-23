@@ -2,7 +2,7 @@ from mago.utils.collector import Collector
 from unittest.mock import MagicMock
 from mago.utils.worker import Worker
 from datetime import datetime, timedelta
-
+import time
 
 def task_test():
     pass
@@ -16,10 +16,10 @@ for id in range(10):
         return_value={
             "id": id,
             "log": "Worker Log {}".format(id),
-            "created": datetime.now(),
+            "created": datetime.now().timestamp(),
             "result": [{
-                "start_time": timer,
-                "end_time": timer + timedelta(seconds=5),
+                "start_time": timer.timestamp(),
+                "end_time": (timer + timedelta(seconds=5)).timestamp(),
                 "duration": 5,
                 "value": 5,
                 "status": "SUCCESS"

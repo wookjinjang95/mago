@@ -19,7 +19,8 @@ class Mago:
         tasks_args: list[Tuple],
         oper_types: list[str],
         total_workers: int,
-        output_path: str
+        output_path: str,
+        timeout: int = 60
     ):
         self.output_path = output_path
         if not os.path.exists(self.output_path):
@@ -29,7 +30,8 @@ class Mago:
             tasks=tasks,
             tasks_args=tasks_args,
             oper_types=oper_types,
-            total_workers=total_workers
+            total_workers=total_workers,
+            timeout=timeout
         )
         self.report_generator = ReportGenerator(output=output_path)
         self.logger = logging.getLogger(__name__)
