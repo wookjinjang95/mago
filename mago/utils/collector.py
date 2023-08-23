@@ -39,10 +39,10 @@ class Collector:
         for task, each_data in new_data.items():
             count_start_and_end_time[task] = defaultdict(int)
             for exec_data in each_data:
-                rounded_start_time = int(exec_data['start_time'] / 1000)
-                roudned_end_time = int(exec_data['end_time'] / 1000)
+                rounded_start_time = round(exec_data['start_time'], 0)
+                rounded_end_time = round(exec_data['end_time'], 0)
                 count_start_and_end_time[task][rounded_start_time] += 1
-                count_start_and_end_time[task][roudned_end_time] -= 1
+                count_start_and_end_time[task][rounded_end_time] -= 1
 
         y_labels = {}
         for task in count_start_and_end_time:
@@ -58,27 +58,24 @@ class Collector:
                     'y': total_active_workers
                 })
             
-
         return Collector.generate_datasets(y_labels)
 
     @staticmethod
     def collect_total_task_finished_per_worker(data: dict[str, list[Worker]]):
-        index = total_workers = 0
+        index = 0
         x_labels = []
         y_labels = {}
-        indices = defaultdict(list)
-        #first get total_workers
-        for _, each_data in data.items():
-            total_workers += len(each_data)
-        
+        indices = defaultdict()
+
         """
         generate key, value which the key is thread_unique_ID
-        #and the value is the index of the list.
+        #and the value is the index that will point within the list.
         for example, two unique thread ID will have
         {
             "threadID#1": 0,
             "threadID#2": 1
         }
+        Here index will also count how many total workers are there.
         """
         for _, each_data in data.items():
             for worker in each_data:
@@ -87,7 +84,7 @@ class Collector:
                 index += 1
 
         for task, each_data in data.items():
-            y_labels[task] = [0 for _ in range(total_workers)]
+            y_labels[task] = [0 for _ in range(index)]
             for worker in each_data:
                 y_labels[task][indices[worker._id]] = worker.get_total_tasks_executed()
         

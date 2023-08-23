@@ -193,6 +193,7 @@ class TrafficManager:
                         args=task_args
                     )
                 )
+                id_tracker += 1
 
             for worker in this_iter_workers:
                 worker.start()
@@ -202,7 +203,5 @@ class TrafficManager:
         self._wait(workers)
 
         self.results[task.__name__] += workers
-
-
 
     

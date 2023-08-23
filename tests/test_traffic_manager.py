@@ -42,8 +42,12 @@ def test_peak_load():
     workers = results['random_sleep']
     assert len(workers) == 10
 
-    for id in range(len(workers)):
-        result = workers[id].get_result()
+    unique_id = set()
+
+    for worker in workers:
+        assert not worker._id in unique_id
+        unique_id.add(worker._id)
+        result = worker.get_result()
         assert 'peak_load' in result['id']
         assert result['log'] != None
         assert len(result['result']) >= 2
@@ -65,9 +69,12 @@ def test_incremental_traffic():
     workers = tm.get_run_result()["sleep_three_seconds"]
 
     assert len(workers) == 55
+    unique_id = set()
 
-    for id in range(len(workers)):
-        result = workers[id].get_result()
+    for worker in workers:
+        assert not worker._id in unique_id
+        unique_id.add(worker._id)
+        result = worker.get_result()
         assert 'incremental_traffic' in result['id']
         assert result['log'] != None
         assert len(result['result']) == 1
@@ -91,9 +98,12 @@ def test_continuous_load():
 
     tm.run()
     workers = tm.get_run_result()['sleep_three_seconds']
+    unique_id = set()
 
-    for id in range(len(workers)):
-        result = workers[id].get_result()
+    for worker in workers:
+        assert not worker._id in unique_id
+        unique_id.add(worker._id)
+        result = worker.get_result()
         assert 'continuous_load' in result['id']
         assert result['log'] != None
         assert len(result['result']) == 1
