@@ -21,4 +21,7 @@ namespace = true
 include = ["mago*"]
 exclude = ["tests", "img"]
 
+[tool.setuptools]
+py-modules = []
+
 [tool.setuptools_scm]
