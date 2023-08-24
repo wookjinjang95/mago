@@ -16,4 +16,9 @@ dependencies = [
     "django"
 ]
 
+[options.packages.find]
+namespace = true
+include = ["mago*"]
+exclude = ["tests", "img"]
+
 [tool.setuptools_scm]
