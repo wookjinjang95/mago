@@ -17,10 +17,11 @@ dependencies = [
 ]
 
 [options.packages.find]
-namespace = true
+namespace = false
+include = ["mago*"]
 exclude = ["tests", "img"]
 
 [tool.setuptools]
-py-modules = []
+packages = ["mago"]
 
 [tool.setuptools_scm]
