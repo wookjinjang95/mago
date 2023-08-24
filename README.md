@@ -119,3 +119,41 @@ The worker report will show graph of average response time, number of workers th
 
 ### Logs.html
 The log report is a data tables that shows all the detailed information for each individual thread or worker. This can be used for detail debugging and analyzing flaky results.
+
+## Example
+
+Let's see some examples of performing post requests and get requests at the same time. Let's say you want to create a test, which 10 users will perform GET requests and the other 10 users will perform POST requests. This is a performance test to make sure that your endpoint or API can handle both GET and POST requests under certain stress.
+
+Let's create two simple function test below that one function will perform GET and the other will perform POST.
+
+```python
+def test_get_page_w3schools():
+    x = requests.get('https://w3schools.com/python/demopage.htm')
+    print(x.text)
+
+def test_post_page_w3schools():
+    url = 'https://www.w3schools.com/python/demopage.php'
+    myObj = {'somekey': 'somevalue'}
+
+    x = requests.post(url, json=myObj)
+    print(x.text)
+```
+
+The most big advantage of MAGO is that developers can create their own custom task or request and pass in that function as a test method for any load or stress tests as you should see below.
+
+```python
+mago = Mago(
+    tasks=[test_get_page_w3schools, test_post_page_w3schools],
+    tasks_args=[(), (), ()],
+    total_workers=10,
+    oper_types=['incremental_traffic', 'peak_load'],
+    output_path="./output",
+    timeout=10
+)
+
+mago.run()
+```
+
+As you can see below screnshot, under number of workers, you can see the blue line which is a traffic for peak load. Red line is an incremental traffic as users request increase over time.
+
+![plot](./img/mix_traffic.png)
