@@ -1,4 +1,3 @@
-from datetime import datetime
 from threading import Thread
 from typing import Callable, Tuple
 from io import StringIO
@@ -42,12 +41,12 @@ class Worker(Thread):
         Just note that Thread can be run only once.
     """
     def run(self) -> None:
-        self._time_created = time.time()
+        self._time_created = time.time() * 1000
 
         while not self._stop_loop:
             self.logger.info("Starting worker: {} with task: {}".format(
                 self._id, self._task.__name__))
-            time_started = time.time()
+            time_started = time.time() * 1000
             status = "SUCCESS"
             result = None
             try:
@@ -60,19 +59,19 @@ class Worker(Thread):
                 status = "FAILED"
                 self._total_timedout += 1
             finally:
-                time_ended = time.time()
+                time_ended = time.time() * 1000
                 self.logger.info("Worker {} has succesfully finished the process.".format(
                     self._id))
 
                 if self._timeout != None:
-                    if time_ended - self._time_created > self._timeout:
+                    if time_ended - self._time_created > self._timeout * 1000:
                         status = "FAILED DUE TO TIMEOUT"
                         self._stop_loop = True
                 
                 self._results.append({
-                    "start_time": time_started * 1000,
-                    "end_time": time_ended * 1000,
-                    "duration": (time_ended - time_started) * 1000,
+                    "start_time": time_started,
+                    "end_time": time_ended,
+                    "duration": time_ended - time_started,
                     "value": result,
                     "status": status
                 })
@@ -81,6 +80,8 @@ class Worker(Thread):
             if not self._repeat:
                 break
         
+        self._time_ended = time.time() * 1000
+    
     """
         Get all info
     """

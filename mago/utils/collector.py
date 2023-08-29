@@ -31,18 +31,22 @@ class Collector:
         return results
 
     @staticmethod
-    def collect_total_clients_per_timeline(data: dict[str, list[Worker]], time_increment=1):
-        new_data = Collector.collect_workers_result(data)
-
+    def collect_total_clients_per_timeline(data: dict[str, list[Worker]]):
         count_start_and_end_time = {}
 
-        for task, each_data in new_data.items():
+        for task, workers in data.items():
             count_start_and_end_time[task] = defaultdict(int)
-            for exec_data in each_data:
-                rounded_start_time = round(exec_data['start_time'], 0)
-                rounded_end_time = round(exec_data['end_time'], 0)
+            for each_worker in workers:
+                rounded_start_time = round(each_worker._time_created, 0)
+                rounded_end_time = round(each_worker._time_ended, 0)
                 count_start_and_end_time[task][rounded_start_time] += 1
                 count_start_and_end_time[task][rounded_end_time] -= 1
+    
+            # for exec_data in each_data:
+            #     rounded_start_time = round(exec_data['start_time'], 0)
+            #     rounded_end_time = round(exec_data['end_time'], 0)
+            #     count_start_and_end_time[task][rounded_start_time] += 1
+            #     count_start_and_end_time[task][rounded_end_time] -= 1
 
         y_labels = {}
         for task in count_start_and_end_time:
@@ -131,11 +135,12 @@ class Collector:
         for task, times in formatted_data.items():
             collected_data[task] = {}
             for end_time, duration in times:
-                if not end_time in collected_data[task]:
-                    collected_data[task][end_time] = [duration, 1]
+                rounded_end_time = round(end_time, 10)
+                if not rounded_end_time in collected_data[task]:
+                    collected_data[task][rounded_end_time] = [duration, 1]
                 else:
-                    collected_data[task][end_time][0] += duration
-                    collected_data[task][end_time][1] += 1
+                    collected_data[task][rounded_end_time][0] += duration
+                    collected_data[task][rounded_end_time][1] += 1
 
         y_labels = {}
         for task in collected_data:

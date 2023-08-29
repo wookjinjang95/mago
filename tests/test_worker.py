@@ -54,7 +54,8 @@ def test_worker_with_repeat_and_timeout():
         task=sleep_one_second,
         args=(),
         timeout=10,
-        repeat=True)
+        repeat=True
+    )
 
     test_worker.start()
     test_worker.join()

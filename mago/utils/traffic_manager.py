@@ -49,12 +49,12 @@ class TrafficManager:
     def _generate_thread_id(self, traffic_name, traffic_id, thread_id):
         return "{}-{}-{}".format(traffic_name, traffic_id, thread_id)
 
-    def _start_process(self, childs) -> None:
+    def _start_process(self, childs: list[Worker]) -> None:
         for child in childs:
             child.start()
 
     #This wait function is general wait function.
-    def _wait(self, childs) -> None:
+    def _wait(self, childs: list[Worker]) -> None:
         for child in childs:
             child.join()
 
@@ -145,8 +145,8 @@ class TrafficManager:
         timout of the test duration.
     """
     def peak_load(self, traffic_name, traffic_id, task, task_args) -> None:
-        workers = []
         id_tracker = 0
+        workers = []
 
         for _ in range(self.total_workers):
             workers.append(
@@ -162,8 +162,7 @@ class TrafficManager:
             )
             id_tracker += 1
 
-        for worker in workers:
-            worker.start()
+        self._start_process(workers)
         
         print("Scheduled workers, just waiting for workers to finish")
         self._wait(workers)

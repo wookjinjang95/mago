@@ -12,6 +12,8 @@ timer = datetime.now()
 
 for id in range(10):
     worker = Worker(id=id, task=task_test, args=())
+    worker._time_created = timer.timestamp()
+    worker._time_ended = (timer + timedelta(seconds=5)).timestamp()
     worker.get_result = MagicMock(
         return_value={
             "id": id,

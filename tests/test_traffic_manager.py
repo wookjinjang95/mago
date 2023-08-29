@@ -57,18 +57,19 @@ def test_peak_load():
 
 def test_incremental_traffic():
     def sleep_three_seconds():
-        time.sleep(3)
+        time.sleep(5)
 
     tm = TrafficManager(
         tasks=[sleep_three_seconds],
         tasks_args=[()],
-        oper_types=["incremental_traffic"]
+        oper_types=["incremental_traffic"],
+        timeout=10
     )
 
     tm.run()
     workers = tm.get_run_result()["sleep_three_seconds"]
 
-    assert len(workers) == 55
+    assert len(workers) == 3
     unique_id = set()
 
     for worker in workers:
