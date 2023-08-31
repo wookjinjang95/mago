@@ -7,8 +7,8 @@ import time, itertools
 
 
 """
-    TODO: Add logging for this class.
-    TODO: Max workers are not defined.
+    Author: Wookjin Jang
+    Email: wookjinjang95@gmail.com
 
     Convert task argument into list and we want args for that list also.
     Use args as list also. It will be one to one ratio reference.
@@ -20,7 +20,14 @@ import time, itertools
     assigned to that tasks.
 """
 class TrafficManager:
-    def __init__(self, tasks: list[Callable], tasks_args: list[Tuple], oper_types: list[str], **kwargs):
+    def __init__(
+        self,
+        tasks: list[Callable],
+        tasks_args: list[Tuple],
+        oper_types: list[str],
+        log_directory: str = None,
+        **kwargs
+    ):
         self.tasks = tasks
         self.tasks_args = tasks_args
         self.oper_types = oper_types
@@ -31,6 +38,7 @@ class TrafficManager:
         self.processes = []
         self.results = defaultdict(list)
         self.traffic_unique_id = itertools.count()
+        self.log_directory = log_directory
 
     """
         Remember that when you run the traffic manager again, it will
@@ -123,7 +131,8 @@ class TrafficManager:
                         id=self._generate_thread_id(
                             traffic_name, traffic_id, id_tracker),
                         args=task_args,
-                        task=task
+                        task=task,
+                        log_directory=self.log_directory
                     )
                 )
                 id_tracker += 1
@@ -157,7 +166,8 @@ class TrafficManager:
                     task=task,
                     timeout=self.timeout,
                     repeat=True,
-                    args=task_args
+                    args=task_args,
+                    log_directory=self.log_directory
                 )
             )
             id_tracker += 1
@@ -194,7 +204,8 @@ class TrafficManager:
                             traffic_name, traffic_id, id_tracker
                         ),
                         task=task,
-                        args=task_args
+                        args=task_args,
+                        log_directory=self.log_directory
                     )
                 )
                 id_tracker += 1

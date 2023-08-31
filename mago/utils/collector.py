@@ -3,6 +3,10 @@ from collections import defaultdict
 import numpy as np
 
 
+"""
+    Author: Wookjin Jang
+    Email: wookjinjang95@gmail.com
+"""
 class Collector:
     @staticmethod
     def generate_datasets(y_labels: dict[str, list]):

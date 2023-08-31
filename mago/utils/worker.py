@@ -1,20 +1,23 @@
 from threading import Thread
 from typing import Callable, Tuple
 from io import StringIO
-import logging, time
+import logging, time, sys, os
 
-
+"""
+    Author: Wookjin Jang
+    Email: wookjinjang95@gmail.com
+"""
 class Worker(Thread):
     def __init__(self,
         id: str,
         task: Callable,
         args: Tuple,
+        log_directory: str = None,
         repeat: bool = False,
         timeout: int = None
     ):
         Thread.__init__(self)
         self._id = id
-        self._log = ""
         self._task = task
         self._args = args
         self._timeout: int = timeout
@@ -28,11 +31,33 @@ class Worker(Thread):
         self._tasks_executed = 0
         self._total_passed = 0
         self._total_timedout = 0
+
+        #add sysout handler
+        self.sys_handler = logging.StreamHandler(sys.stdout)
+        self.sys_handler.setFormatter(
+            logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
+
+        #setting up the string log handler.
         self.log_stream = StringIO()
         self.log_handler = logging.StreamHandler(self.log_stream)
+        self.log_handler.setFormatter(
+            logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
+
+        #Finally setup the logger.
         self.logger = logging.getLogger("WorkerLogger:{}".format(self._id))
-        self.logger.setLevel(logging.ERROR)
+        self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(self.log_handler)
+        self.logger.addHandler(self.sys_handler)
+
+        #setting up the file handler.
+        if log_directory != None:
+            self.log_filepath = os.path.join(log_directory, '{}.log'.format(self._id))
+            self.fp = open(self.log_filepath, 'x')
+            self.fp.close()
+            self.file_handler = logging.FileHandler(self.log_filepath)
+            self.file_handler.setFormatter(
+                logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
+            self.logger.addHandler(self.file_handler)
 
     """
         This is the main run function that will execute the task given.
@@ -88,7 +113,6 @@ class Worker(Thread):
     def get_result(self) -> dict:
         return {
             "id": self._id,
-            "log": self._log,
             "created": self._time_created,
             "result": self._results
         }

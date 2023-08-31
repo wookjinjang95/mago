@@ -20,7 +20,8 @@ django.setup()
 from django.template.loader import get_template
 
 """
-    TODO: Create a test for report_generator.py
+    Author: Wookjin Jang
+    Email: wookjinjang95@gmail.com
 """
 class ReportGenerator:
     def __init__(self, output: str):

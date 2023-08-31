@@ -49,7 +49,6 @@ def test_peak_load():
         unique_id.add(worker._id)
         result = worker.get_result()
         assert 'peak_load' in result['id']
-        assert result['log'] != None
         assert len(result['result']) >= 2
 
         for exec_result in result['result']:
@@ -77,7 +76,6 @@ def test_incremental_traffic():
         unique_id.add(worker._id)
         result = worker.get_result()
         assert 'incremental_traffic' in result['id']
-        assert result['log'] != None
         assert len(result['result']) == 1
         assert result['created'] != None
 
@@ -106,7 +104,6 @@ def test_continuous_load():
         unique_id.add(worker._id)
         result = worker.get_result()
         assert 'continuous_load' in result['id']
-        assert result['log'] != None
         assert len(result['result']) == 1
         assert result['created'] != None
 

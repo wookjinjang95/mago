@@ -1,16 +1,15 @@
+import shutil
 from .utils.report_generator import ReportGenerator
 from .utils.traffic_manager import TrafficManager
 from .utils.collector import Collector
 from typing import Callable, Tuple
 import logging, os
 
-
 logging.basicConfig(level=logging.DEBUG)
-"""
-    This is the main Seshat which users will interact for their
-    own custom testing method.
 
-    TODO: Create a test for Seshat itself
+"""
+    Author: Wookjin Jang
+    Email: wookjinjang95@gmail.com
 """
 class Mago:
     def __init__(
@@ -20,18 +19,35 @@ class Mago:
         oper_types: list[str],
         total_workers: int,
         output_path: str,
-        timeout: int = 60
+        timeout: int = 60,
+        store_log = False
     ):
         self.output_path = output_path
-        if not os.path.exists(self.output_path):
-            os.mkdir(self.output_path)
+        if os.path.exists(self.output_path):
+            shutil.rmtree(self.output_path)
+        os.mkdir(self.output_path)
+        
+        """
+            We want to store the log, but sometimes there could be an option
+            which user don't want to store those logs. It is set to default
+            as false to not to take the memory of the device. If the None value
+            gets passed into the traffic manager, it will also pass none value
+            into the worker; thus, not generating log files.
+        """
+        
+        if store_log:
+            self.log_directory = os.path.join(self.output_path, 'logs')
+            os.mkdir(self.log_directory)
+        else:
+            self.log_directory = None
 
         self.traffic_manager = TrafficManager(
             tasks=tasks,
             tasks_args=tasks_args,
             oper_types=oper_types,
             total_workers=total_workers,
-            timeout=timeout
+            timeout=timeout,
+            log_directory=self.log_directory
         )
         self.report_generator = ReportGenerator(output=output_path)
         self.logger = logging.getLogger(__name__)
